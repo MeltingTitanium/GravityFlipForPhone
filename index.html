@@ -170,7 +170,7 @@
         transform: translateX(-50%);
         display: none;
         grid-template-columns: repeat(3, 60px);
-        grid-template-rows: repeat(2, 60px);
+        grid-template-rows: repeat(3, 60px);
         gap: 10px;
         z-index: 15;
       }
@@ -194,6 +194,8 @@
       #mobileLeft { grid-column: 1; grid-row: 2; }
       #mobileDown { grid-column: 2; grid-row: 2; }
       #mobileRight { grid-column: 3; grid-row: 2; }
+      #mobileRestart { grid-column: 1; grid-row: 3; }
+      #mobileLevelSelect { grid-column: 3; grid-row: 3; }
       @media (max-width: 800px) {
         .mobile-controls { display: grid; }
       }
@@ -211,6 +213,8 @@
       <div id="mobileLeft" class="arrow-btn">&#9664;</div>
       <div id="mobileDown" class="arrow-btn">&#9660;</div>
       <div id="mobileRight" class="arrow-btn">&#9654;</div>
+      <div id="mobileRestart" class="arrow-btn">&#8634;</div>
+      <div id="mobileLevelSelect" class="arrow-btn">&#9776;</div>
     </div>
 
     <!-- ======================================================
@@ -2761,6 +2765,8 @@
       const mobileDown = document.getElementById("mobileDown");
       const mobileLeft = document.getElementById("mobileLeft");
       const mobileRight = document.getElementById("mobileRight");
+      const mobileRestart = document.getElementById("mobileRestart");
+      const mobileLevelSelect = document.getElementById("mobileLevelSelect");
 
       function bindMobileBtn(btn, dir) {
         btn.addEventListener("touchstart", e => {
@@ -2777,6 +2783,33 @@
       bindMobileBtn(mobileDown, "down");
       bindMobileBtn(mobileLeft, "left");
       bindMobileBtn(mobileRight, "right");
+
+      function restartLevel() {
+        dashReadyTime = Date.now();
+        deathSound.currentTime = 0;
+        deathSound.play();
+        loadLevel(currentLevel);
+      }
+
+      mobileRestart.addEventListener("click", restartLevel);
+      mobileRestart.addEventListener("touchstart", e => {
+        e.preventDefault();
+        restartLevel();
+      });
+
+      function openLevelSelector() {
+        if (levelSelectorActive) {
+          hideLevelSelector();
+        } else {
+          showLevelSelector(true, false);
+        }
+      }
+
+      mobileLevelSelect.addEventListener("click", openLevelSelector);
+      mobileLevelSelect.addEventListener("touchstart", e => {
+        e.preventDefault();
+        openLevelSelector();
+      });
 
       // -------------------------------------------------
       // 20. Difficulty Selection Buttons (At the Bottom of Main Menu)
