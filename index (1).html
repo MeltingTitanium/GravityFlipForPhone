@@ -158,6 +158,44 @@
       #clearStoragePrompt {
         z-index: 30;
       }
+
+      /* ======================================================
+         Mobile Controls
+         ====================================================== */
+      .mobile-controls {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+        grid-template-columns: repeat(3, 60px);
+        grid-template-rows: repeat(2, 60px);
+        gap: 10px;
+        z-index: 15;
+      }
+      .mobile-controls .arrow-btn {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid #fff;
+        border-radius: 10px;
+        color: #fff;
+        font-size: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+      }
+      .mobile-controls .arrow-btn:active {
+        background: rgba(255, 255, 255, 0.5);
+      }
+      #mobileUp { grid-column: 2; grid-row: 1; }
+      #mobileLeft { grid-column: 1; grid-row: 2; }
+      #mobileDown { grid-column: 2; grid-row: 2; }
+      #mobileRight { grid-column: 3; grid-row: 2; }
+      @media (max-width: 800px) {
+        .mobile-controls { display: grid; }
+      }
     </style>
   </head>
   <body>
@@ -165,6 +203,14 @@
          Canvas Element: The main drawing surface for the game.
          ====================================================== -->
     <canvas id="gameCanvas"></canvas>
+
+    <!-- Mobile Controls -->
+    <div id="mobileControls" class="mobile-controls">
+      <div id="mobileUp" class="arrow-btn">&#9650;</div>
+      <div id="mobileLeft" class="arrow-btn">&#9664;</div>
+      <div id="mobileDown" class="arrow-btn">&#9660;</div>
+      <div id="mobileRight" class="arrow-btn">&#9654;</div>
+    </div>
 
     <!-- ======================================================
          Main Menu Overlay: Displays the game title and options.
@@ -585,6 +631,28 @@
       // -------------------------------------------------
       let arrowDirX = 0;
       let arrowDirY = -1;
+
+      function setLastDirection(dir) {
+        lastDirection = dir;
+        switch (dir) {
+          case "up":
+            arrowDirX = 0;
+            arrowDirY = -1;
+            break;
+          case "down":
+            arrowDirX = 0;
+            arrowDirY = 1;
+            break;
+          case "left":
+            arrowDirX = -1;
+            arrowDirY = 0;
+            break;
+          case "right":
+            arrowDirX = 1;
+            arrowDirY = 0;
+            break;
+        }
+      }
 
       // -------------------------------------------------
       // 5. Display Cooldown (Displayed at the Top-Left Corner)
@@ -1406,16 +1474,16 @@
         } else {
           switch (e.key) {
             case "ArrowUp":
-              lastDirection = "up";
+              setLastDirection("up");
               break;
             case "ArrowDown":
-              lastDirection = "down";
+              setLastDirection("down");
               break;
             case "ArrowLeft":
-              lastDirection = "left";
+              setLastDirection("left");
               break;
             case "ArrowRight":
-              lastDirection = "right";
+              setLastDirection("right");
               break;
           }
         }
@@ -2684,6 +2752,30 @@
       });
 
       clearNo.addEventListener("click", hideClearStoragePrompt);
+
+      // -------------------------------------------------
+      // 19.5 Mobile Controls
+      // -------------------------------------------------
+      const mobileUp = document.getElementById("mobileUp");
+      const mobileDown = document.getElementById("mobileDown");
+      const mobileLeft = document.getElementById("mobileLeft");
+      const mobileRight = document.getElementById("mobileRight");
+
+      function bindMobileBtn(btn, dir) {
+        btn.addEventListener("touchstart", e => {
+          e.preventDefault();
+          setLastDirection(dir);
+        });
+        btn.addEventListener("mousedown", e => {
+          e.preventDefault();
+          setLastDirection(dir);
+        });
+      }
+
+      bindMobileBtn(mobileUp, "up");
+      bindMobileBtn(mobileDown, "down");
+      bindMobileBtn(mobileLeft, "left");
+      bindMobileBtn(mobileRight, "right");
 
       // -------------------------------------------------
       // 20. Difficulty Selection Buttons (At the Bottom of Main Menu)
