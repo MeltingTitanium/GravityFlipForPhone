@@ -260,6 +260,7 @@
         The dash has a 2-second cooldown (top-left). After death, the dash cooldown resets.
       </p>
       <p><em>Tap the Continue button or press Enter to continue...</em></p>
+      <div id="gimmickContinue" class="bigButton">Continue</div>
     </div>
 
     <!-- ======================================================
@@ -276,6 +277,7 @@
         The teleport has a 4-second cooldown.
       </p>
       <p><em>Tap the Continue button or press Enter to continue...</em></p>
+      <div id="teleportContinue" class="bigButton">Continue</div>
     </div>
 
     <!-- ======================================================
@@ -2703,6 +2705,8 @@
       const toggleSoundEffects = document.getElementById("toggleSoundEffects");
       const toggleMusic = document.getElementById("toggleMusic");
       const toggleLightMode = document.getElementById("toggleLightMode");
+      const gimmickContinue = document.getElementById("gimmickContinue");
+      const teleportContinue = document.getElementById("teleportContinue");
 
       settingsButton.addEventListener("click", () => {
         mainMenu.classList.add("hidden");
@@ -2736,6 +2740,17 @@
         settings.lightMode = this.checked;
         // Save to localStorage whenever changed
         localStorage.setItem('gravityFlipperSettings', JSON.stringify(settings));
+      });
+
+      gimmickContinue.addEventListener("click", () => {
+        showGimmickPopup = false;
+        gamePaused = false;
+        document.getElementById("gimmickPopup").style.display = "none";
+      });
+
+      teleportContinue.addEventListener("click", () => {
+        gamePaused = false;
+        document.getElementById("teleportPopup").style.display = "none";
       });
 
       function showClearStoragePrompt() {
