@@ -194,7 +194,9 @@
       #mobileLeft { grid-column: 1; grid-row: 2; }
       #mobileDown { grid-column: 2; grid-row: 2; }
       #mobileRight { grid-column: 3; grid-row: 2; }
-      @media (max-width: 800px) {
+      /* Show mobile controls up to typical tablet widths so landscape phones
+         also display them */
+      @media (max-width: 1024px) {
         .mobile-controls { display: grid; }
       }
     </style>
