@@ -1091,19 +1091,42 @@
           hazards: [],
           oranges: [],
           browns: [],
-          purples: [
-            // Large moving purple block at the bottom
-            {
-              x: 0,
-              y: 0.95,
-              w: 1,
-              h: 0.02,
-              dy: -0.75,
-              moving: true,
-              verticalMovement: true
-            },
-            // Static purple block near the center
-            { x: 0.49, y: 0.75, w: 0.02, h: 0.25 }
+        purples: [
+          // Large moving purple block at the bottom
+          {
+            x: 0,
+            y: 0.95,
+            w: 1,
+            h: 0.02,
+            dy: -0.75,
+            moving: true,
+            verticalMovement: true
+          },
+          // Static purple block near the center
+          { x: 0.49, y: 0.75, w: 0.02, h: 0.25 }
+        ]
+        },
+        // NEW LEVEL: Stage 2 Level 4 with alternating blue blocks
+        {
+          spawn: { x: 0.1, y: 0.9 },
+          target: { x: 0.9, y: 0.1 },
+          teleportLevel: true,
+          stage: 2,
+          platforms: [
+            { x: 0, y: 0.98, w: 1, h: 0.02 },
+            { x: 0, y: 0, w: 1, h: 0.02 },
+            { x: 0, y: 0, w: 0.02, h: 1 },
+            { x: 0.98, y: 0, w: 0.02, h: 1 },
+            { x: 0.05, y: 0.85, w: 0.25, h: 0.02 },
+            { x: 0.7, y: 0.15, w: 0.25, h: 0.02 }
+          ],
+          hazards: [],
+          oranges: [],
+          browns: [],
+          purples: [],
+          blues: [
+            { x: 0, y: 0.45, w: 0.45, h: 0.02 },
+            { x: 0.55, y: 0.45, w: 0.45, h: 0.02 }
           ]
         }
       ];
@@ -1126,6 +1149,12 @@
 
       // NEW: separate purples array
       let purples = [];
+
+      // NEW: blue blocks that toggle solidity
+      let blues = [];
+      let blueSolid = true;
+      let lastBlueToggle = Date.now();
+      const blueToggleInterval = 2000; // ms
 
       // Target object representing the level’s goal (if applicable)
       let target = { x: 0, y: 0, size: cube.size };
@@ -1256,6 +1285,18 @@
           moving: p.moving || false,
           verticalMovement: p.verticalMovement || false
         }));
+
+        // NEW: map blue blocks (no movement)
+        blues = (lvl.blues || []).map(b => ({
+          x: b.x * canvas.width,
+          y: b.y * canvas.height,
+          width: b.w * canvas.width,
+          height: b.h * canvas.height
+        }));
+
+        // Reset blue block timer when loading level
+        blueSolid = true;
+        lastBlueToggle = Date.now();
 
         // Map brown block definitions
         browns = (lvl.browns || []).map(b => ({
@@ -1665,9 +1706,18 @@
       function update() {
         if (gamePaused) return;
         const now = Date.now();
+
+        // Toggle blue block solidity
+        if (now - lastBlueToggle >= blueToggleInterval) {
+          blueSolid = !blueSolid;
+          lastBlueToggle = now;
+        }
         let obstacles = [...platforms, ...browns];
         if (levels[currentLevel].fallingBrownLevel) {
           obstacles = obstacles.concat(fallingBrownBlocks);
+        }
+        if (blueSolid) {
+          obstacles = obstacles.concat(blues);
         }
 
         // Handle dashing
@@ -1724,7 +1774,7 @@
             }
           }
           if (isDashing) {
-            if (platforms.some(p => {
+            if (obstacles.some(p => {
               const pRect = { x: p.x, y: p.y, width: p.width, height: p.height };
               return rectIntersect(cubeRect, pRect);
             })) {
@@ -1986,6 +2036,20 @@
           const purpleRect = { x: p.x, y: p.y, width: p.width, height: p.height };
           if (rectIntersect(cubeRect, purpleRect)) {
             if (!(isDashing || now < dashGraceUntil)) {
+              dashReadyTime = Date.now();
+              deathSound.currentTime = 0;
+              deathSound.play();
+              loadLevel(currentLevel);
+              return;
+            }
+          }
+        }
+
+        // Check collisions with blues when solid
+        if (blueSolid) {
+          for (let b of blues) {
+            const blueRect = { x: b.x, y: b.y, width: b.width, height: b.height };
+            if (rectIntersect(cubeRect, blueRect)) {
               dashReadyTime = Date.now();
               deathSound.currentTime = 0;
               deathSound.play();
@@ -2364,6 +2428,16 @@
           ctx.fillRect(p.x, p.y, p.width, p.height);
         }
       }
+
+      // NEW: draw blue blocks with transparency when intangible
+      function drawBlues() {
+        ctx.fillStyle = "blue";
+        if (!blueSolid) ctx.globalAlpha = 0.4;
+        for (let b of blues) {
+          ctx.fillRect(b.x, b.y, b.width, b.height);
+        }
+        ctx.globalAlpha = 1.0;
+      }
       function drawBrowns() {
         ctx.fillStyle = "saddlebrown";
         for (let b of browns) {
@@ -2537,6 +2611,7 @@
         drawHazards();
         drawOranges();
         drawPurples();
+        drawBlues();
         drawBrowns();
         drawFallingBrownBlocks();
         drawCube();
